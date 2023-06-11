@@ -36,7 +36,7 @@ There is an OpenScad document in the Models directory that can be 3d printed as 
 
 ### Flash Board Firmware
 
-[drv_8833_link]: https://www.amazon.com/MakerFocus-Discharge-Integrated-Charging-Protection/dp/B07PZT3ZW2/ref=sr_1_1?keywords=MakerFocus+6pcs+2A+5V+Charging+Protection+Module&qid=1686356613&s=electronics&sr=1-1
+[drv_8833_link]: https://www.amazon.com/gp/product/B0BGLH27GG/ref=sw_img_1?smid=A2QD586WPO9XSR&psc=1
 [esp32_c3_link]: https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/113991054/16652880?s=N4IgTCBcDaIM4FMkBMAEcAuBXZBLA9qgBoCSAggPKoCiAygAoDMYAwoyALoC%2BQA
 [makerfocus_charge_discharge_module_link]: https://www.amazon.com/gp/product/B07PZT3ZW2/ref=ppx_yo_dt_b_search_asin_image?ie=UTF8&psc=1
 [lithium_ion_battery_link]: https://www.aliexpress.us/item/3256804370986754.html?spm=a2g0o.order_list.order_list_main.4.64bc18023Wexc3&gatewayAdapt=glo2usa
