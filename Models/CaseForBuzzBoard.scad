@@ -262,7 +262,7 @@ module fannout(diameter)
 {
     
 rotate_extrude()
-polygon([[0+diameter,0],[0+diameter,1],[1+diameter,1], [0.7+diameter,0.9], [0.5+diameter,0.75], [0.3+diameter,0.55], [0.15+diameter,0.35]]);
+polygon([[-.01+diameter,-0.5],[0+diameter,1],[2+diameter,1], [1.9+diameter,0.9], [1.7+diameter,0.75], [1.2+diameter,0.35], [0.8+diameter,0.05]]);
 }
 
 CaseTop();

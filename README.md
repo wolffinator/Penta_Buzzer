@@ -10,7 +10,7 @@ Purpose of this device is to provide a pre-programmed buzzing pattern to each of
 ## ⚠️ Word of Warning
 * This project is at its infancy. The current hardware design will change and may not work with future versions of this code.
 * Project requires intermediate skills in soldering. There are a few surface mount soldering points and many close solder pads. Practice technique if you are unsure.
-* ESP32 does not have reverse polarity protection. Check your work before you fry your board.
+* ESP32 does not have reverse polarity protection (ask me how I know). Check your work before you fry your board.
 * This is not a well designed product (yet). Parts will and have failed. 
 ### BOM
 * [Seeed Studio XIAO ESP32-C3][esp32_c3_link]. This is the microcontroller used in this project. This was chosen due to its built in connectivity and battery management circuitry.  
@@ -20,7 +20,15 @@ Purpose of this device is to provide a pre-programmed buzzing pattern to each of
 * Heat Shrink
 * 30AWG stranded wire.
 * 22AWG solid core wire.
-## 🛠 Installation Setup
+### 3d Printable Case
+![3d Printable Case](resources/Case_Mk1.PNG)
+There is an OpenScad document in the Models directory that can be 3d printed as an enclosure for the whole setup. I plan to rework this as it was a pain to assemble.
+## 🛠 Flash Firmware
+
+
+## 🛠 Installation Setup (For Developers)
+### Install Arduino IDE
+### Install Board Support Packages for ESP32
 ### Install Visual Studio Code (VS-Code)
 
 
