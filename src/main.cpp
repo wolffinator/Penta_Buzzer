@@ -5,14 +5,22 @@
 
 // GPIO NUMBER IS NOT BOARD OUTPUT NUMBER! See pin_map-2.png
 const int MOTOR_1 =                     gpio_num_t::GPIO_NUM_21; // GPIO 21 = PIN D6
-const int MOTOR_2 =                     gpio_num_t::GPIO_NUM_7; // GPIO 7 = PIN D5 as written on board. See pin_map-2.png for more info
-const int MOTOR_3 =                     gpio_num_t::GPIO_NUM_4; // D2
-const int MOTOR_4 =                     gpio_num_t::GPIO_NUM_3; // D1
+const int MOTOR_2 =                     gpio_num_t::GPIO_NUM_7;  // GPIO 7 = PIN D5 as written on board. See pin_map-2.png for more info
+const int MOTOR_3 =                     gpio_num_t::GPIO_NUM_4;  // D2
+const int MOTOR_4 =                     gpio_num_t::GPIO_NUM_3;  // D1
 const int MOTOR_CONTROL_ENABLE_PIN =    gpio_num_t::GPIO_NUM_20; // D7
-const int FAULT_PIN =                   gpio_num_t::GPIO_NUM_10;// D10. Is high when board is overheating or over current.
-const int POWER_5V_PIN =                gpio_num_t::GPIO_NUM_6; // D4
-const gpio_num_t POWER_BUTTON_PIN_INV = gpio_num_t::GPIO_NUM_2;// D0
-const int USB_DETECT_PIN =              gpio_num_t::GPIO_NUM_8;// D8 Update to D9 so USB power wakes device.
+const int FAULT_PIN =                   gpio_num_t::GPIO_NUM_10; // D10. Is high when board is overheating or over current.
+const int POWER_5V_PIN =                gpio_num_t::GPIO_NUM_6;  // D4
+const gpio_num_t POWER_BUTTON_PIN_INV = gpio_num_t::GPIO_NUM_2;  // D0. Requires external Pullup
+const int USB_DETECT_PIN =              gpio_num_t::GPIO_NUM_8;  // D8 Update to D9 so USB power wakes device. Requires external pulldown
+// POWER_BUTTON_PIN will no longer be inverted. External pulldown attached.
+// USB_DETECT_PIN updated to pin D9 in V2
+// MOTOR_1 updated to pin D5 in V2
+// MOTOR_2 updated to pin D4 in V2
+// MOTOR_3 updated to pin D3 in V2
+// MOTOR_4 updated to pin D2 in V2
+// MOTOR_5 updated to pin D6 in V2
+// MOTOR_6 updated to pin D10 in V2
 
 enum ButtonState {BUTTON_STATE_OFF, BUTTON_STATE_PUSHED, BUTTON_STATE_ON, BUTTON_STATE_RELEASED};
 ButtonState powerButtonState = ButtonState::BUTTON_STATE_OFF;
@@ -44,18 +52,21 @@ bool isInProgramMode = true;
 bool hasButtonBeenReleasedSinceBoot = false;
 
 int timer = 167;           // The higher the number, the slower the timing.
-int ledPins[] = { 
-4, 1, 2, 3, 1, 4, 2, 3, 1, 2, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13, 
-4, 3, 2, 1, 3, 1, 2, 4, 2, 4, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13, 
-3, 4, 1, 2, 1, 3, 2, 4, 2, 1, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13, 
-3, 4, 2, 1, 4, 3, 1, 2, 1, 4, 3, 2, 13, 13, 13, 13, 13, 13, 13, 13, 
-2, 3, 1, 4, 1, 3, 4, 2, 1, 2, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13, // TODO Dad: Should the first number here be a 2?
-4, 2, 3, 1, 3, 2, 1, 4, 2, 1, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
-3, 1, 4, 2, 4, 2, 1, 3, 2, 3, 4, 1, 13, 13, 13, 13, 13, 13, 13, 13, 
-4, 1, 3, 2, 3, 2, 4, 1, 2, 4, 1, 3, 13, 13, 13, 13, 13, 13, 13, 13 };
-// an array of pin numbers to which LEDs are attached Pin 13 is a pause
-const int pinCount = sizeof(ledPins) / sizeof(int);           // the number of pins (i.e. the length of the array)
 
+int motorSelections[] = 
+{
+    4, 1, 2, 3, 1, 4, 2, 3, 1, 2, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13,
+    4, 3, 2, 1, 3, 1, 2, 4, 2, 4, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13,
+    3, 4, 1, 2, 1, 3, 2, 4, 2, 1, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13,
+    3, 4, 2, 1, 4, 3, 1, 2, 1, 4, 3, 2, 13, 13, 13, 13, 13, 13, 13, 13,
+    2, 3, 1, 4, 1, 3, 4, 2, 1, 2, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13,
+    4, 2, 3, 1, 3, 2, 1, 4, 2, 1, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13,
+    3, 1, 4, 2, 4, 2, 1, 3, 2, 3, 4, 1, 13, 13, 13, 13, 13, 13, 13, 13,
+    4, 1, 3, 2, 3, 2, 4, 1, 2, 4, 1, 3, 13, 13, 13, 13, 13, 13, 13, 13
+};
+// an array of pin numbers to which LEDs are attached Pin 13 is a pause
+const int pinCount = sizeof(motorSelections) / sizeof(int);           // the number of pins (i.e. the length of the array)
+int motorSelectionIdx = 0;
 
 const int PWM_FREQ = 5000;
 const int LEDC_CHANNEL1 = 0;
@@ -117,36 +128,34 @@ void loop() {
         vTaskPrioritySet(NULL, tskIDLE_PRIORITY + 2);
         isFirstTime = false;
     }
-    for (int thisPin = 0; thisPin < pinCount; thisPin++) {
-        CheckStatus();
-        switch (ledPins[thisPin]) { 
-            case 1:
-                ledcWrite(LEDC_CHANNEL1, 153); 
-                delay(timer);
-                ledcWrite(LEDC_CHANNEL1, 0);
-            break;
-            case 2:
-                ledcWrite(LEDC_CHANNEL2, 153);
-                delay(timer);
-                ledcWrite(LEDC_CHANNEL2, 0);
-            break;
-            case 3:
-                ledcWrite(LEDC_CHANNEL3, 153); 
-                delay(timer);
-                ledcWrite(LEDC_CHANNEL3, 0);
-            break;
-            case 4:
-                ledcWrite(LEDC_CHANNEL4, 153); 
-                delay(timer);
-                ledcWrite(LEDC_CHANNEL4, 0);
-            break;
-            case 13:
-            // digitalWrite(13, HIGH); // No onboard LED on this microchip
+    CheckStatus();
+    switch (motorSelections[motorSelectionIdx])
+    { 
+        case 1:
+            ledcWrite(LEDC_CHANNEL1, 153); 
             delay(timer);
-            //digitalWrite(13, LOW); 
-            break;
-        }
+            ledcWrite(LEDC_CHANNEL1, 0);
+        break;
+        case 2:
+            ledcWrite(LEDC_CHANNEL2, 153);
+            delay(timer);
+            ledcWrite(LEDC_CHANNEL2, 0);
+        break;
+        case 3:
+            ledcWrite(LEDC_CHANNEL3, 153); 
+            delay(timer);
+            ledcWrite(LEDC_CHANNEL3, 0);
+        break;
+        case 4:
+            ledcWrite(LEDC_CHANNEL4, 153); 
+            delay(timer);
+            ledcWrite(LEDC_CHANNEL4, 0);
+        break;
+        case 13:
+            delay(timer);
+        break;
     }
+    motorSelectionIdx = (motorSelectionIdx + 1) % pinCount;
 }
 
 /// @brief Check current power button state and do any interactions associated with that state.
