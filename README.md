@@ -23,7 +23,7 @@ Purpose of this device is to provide a pre-programmed buzzing pattern to each of
 ### 3d Printable Case
 ![3d Printable Case](resources/Case_Mk1.PNG)
 There is an OpenScad document in the Models directory that can be 3d printed as an enclosure for the whole setup. I plan to rework this as it was a pain to assemble.
-## 🛠 Flash Firmware
+## 🛠 Flash Firmware (For Users)
 
 
 ## 🛠 Installation Setup (For Developers)
@@ -41,6 +41,11 @@ There is an OpenScad document in the Models directory that can be 3d printed as 
 * Goal of Version 2 is to see if I can create a PCB that works, is small, and combines many boards into a small footprint.
 * Explore fabrication proccess
 * Additional goal is for me (wolffinator) to get better at SMD soldering since this will most likely require some rework/repair.
+### Version 2 Progress:
+#### Schematic
+![Schematic](resources/Schematic.PNG)
+#### PCB Layout
+![PCB_Layout](resources/PCB_Layout.PNG)
 ### Version 3
 * Goal of Version 3 is to make the design as easy to produce as possible.
 * I would love to provide a link for users here to click on and get a quote from one or (or many) PCB manufacturers and have them solder all of the components. It looks like Version 2 requires some hand soldering of SMD components afterwards, which can be difficult.

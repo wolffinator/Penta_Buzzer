@@ -403,6 +403,6 @@ FodyWeavers.xsd
 .gcc-flags.json
 .pio
 
+# KiCad
 *-backups*
-
 PCB/output*
