@@ -405,4 +405,4 @@ FodyWeavers.xsd
 
 *-backups*
 
-PCB\output*
+PCB/output*

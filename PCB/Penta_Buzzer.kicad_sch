@@ -1580,10 +1580,10 @@
   (symbol (lib_id "Connector:Conn_01x01_Pin") (at 248.285 83.185 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2fa06b2e-74c5-456e-99ef-b4f625374d56)
-    (property "Reference" "MTR3" (at 247.65 84.455 0)
+    (property "Reference" "MTR4" (at 247.65 84.455 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "Motor_3" (at 252.095 83.185 0)
+    (property "Value" "Motor_4" (at 252.095 83.185 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Connector_Pin:Pin_D1.0mm_L10.0mm" (at 248.285 83.185 0)
@@ -1596,7 +1596,7 @@
     (instances
       (project "Penta_Buzzer"
         (path "/2b587942-ec45-4a7e-aa22-1280e87cea9c"
-          (reference "MTR3") (unit 1)
+          (reference "MTR4") (unit 1)
         )
       )
     )
@@ -1605,10 +1605,10 @@
   (symbol (lib_id "Connector:Conn_01x01_Pin") (at 102.235 86.36 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 32f83a68-ebb4-4f1d-97a2-6d4f00abd8e4)
-    (property "Reference" "MTR5" (at 103.505 86.36 0)
+    (property "Reference" "MTR6" (at 103.505 86.36 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "Motor_5" (at 109.855 86.36 0)
+    (property "Value" "Motor_6" (at 109.855 86.36 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Connector_Pin:Pin_D1.0mm_L10.0mm" (at 102.235 86.36 0)
@@ -1621,7 +1621,7 @@
     (instances
       (project "Penta_Buzzer"
         (path "/2b587942-ec45-4a7e-aa22-1280e87cea9c"
-          (reference "MTR5") (unit 1)
+          (reference "MTR6") (unit 1)
         )
       )
     )
@@ -1890,10 +1890,10 @@
   (symbol (lib_id "Connector:Conn_01x01_Pin") (at 102.235 88.9 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 65a9a26b-1948-4605-bc1b-f74092c784d8)
-    (property "Reference" "MTR6" (at 103.505 88.9 0)
+    (property "Reference" "MTR5" (at 103.505 88.9 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "Motor_6" (at 109.855 88.9 0)
+    (property "Value" "Motor_5" (at 109.855 88.9 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Connector_Pin:Pin_D1.0mm_L10.0mm" (at 102.235 88.9 0)
@@ -1906,7 +1906,7 @@
     (instances
       (project "Penta_Buzzer"
         (path "/2b587942-ec45-4a7e-aa22-1280e87cea9c"
-          (reference "MTR6") (unit 1)
+          (reference "MTR5") (unit 1)
         )
       )
     )
@@ -2522,10 +2522,10 @@
   (symbol (lib_id "Connector:Conn_01x01_Pin") (at 248.285 85.725 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d0f1f9a1-7739-485f-89b1-6fae2135f4ac)
-    (property "Reference" "MTR4" (at 247.015 86.995 0)
+    (property "Reference" "MTR3" (at 247.015 86.995 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "Motor_4" (at 252.095 85.725 0)
+    (property "Value" "Motor_3" (at 252.095 85.725 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "Connector_Pin:Pin_D1.0mm_L10.0mm" (at 248.285 85.725 0)
@@ -2538,7 +2538,7 @@
     (instances
       (project "Penta_Buzzer"
         (path "/2b587942-ec45-4a7e-aa22-1280e87cea9c"
-          (reference "MTR4") (unit 1)
+          (reference "MTR3") (unit 1)
         )
       )
     )
