@@ -36,6 +36,19 @@ There is an OpenScad document in the Models directory that can be 3d printed as 
 
 ### Flash Board Firmware
 
+## 🔬 Future plans
+### Version 2
+* Goal of Version 2 is to see if I can create a PCB that works, is small, and combines many boards into a small footprint.
+* Explore fabrication proccess
+* Additional goal is for me (wolffinator) to get better at SMD soldering since this will most likely require some rework/repair.
+### Version 3
+* Goal of Version 3 is to make the design as easy to produce as possible.
+* I would love to provide a link for users here to click on and get a quote from one or (or many) PCB manufacturers and have them solder all of the components. It looks like Version 2 requires some hand soldering of SMD components afterwards, which can be difficult.
+* Provide a link to a 3d printed case.
+* Simplify case assembly and wire soldering as much as possible.
+* Include more detailed assembly instructions.
+
+
 [drv_8833_link]: https://www.amazon.com/gp/product/B0BGLH27GG/ref=sw_img_1?smid=A2QD586WPO9XSR&psc=1
 [esp32_c3_link]: https://www.digikey.com/en/products/detail/seeed-technology-co-ltd/113991054/16652880?s=N4IgTCBcDaIM4FMkBMAEcAuBXZBLA9qgBoCSAggPKoCiAygAoDMYAwoyALoC%2BQA
 [makerfocus_charge_discharge_module_link]: https://www.amazon.com/gp/product/B07PZT3ZW2/ref=ppx_yo_dt_b_search_asin_image?ie=UTF8&psc=1
