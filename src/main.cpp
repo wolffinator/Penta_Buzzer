@@ -4,23 +4,15 @@
 #include "rtc_store.h"
 
 // GPIO NUMBER IS NOT BOARD OUTPUT NUMBER! See pin_map-2.png
-const int MOTOR_1 =                     gpio_num_t::GPIO_NUM_21; // GPIO 21 = PIN D6
-const int MOTOR_2 =                     gpio_num_t::GPIO_NUM_7;  // GPIO 7 = PIN D5 as written on board. See pin_map-2.png for more info
-const int MOTOR_3 =                     gpio_num_t::GPIO_NUM_4;  // D2
-const int MOTOR_4 =                     gpio_num_t::GPIO_NUM_3;  // D1
-const int MOTOR_CONTROL_ENABLE_PIN =    gpio_num_t::GPIO_NUM_20; // D7
-const int FAULT_PIN =                   gpio_num_t::GPIO_NUM_10; // D10. Is high when board is overheating or over current.
-const int POWER_5V_PIN =                gpio_num_t::GPIO_NUM_6;  // D4
-const gpio_num_t POWER_BUTTON_PIN_INV = gpio_num_t::GPIO_NUM_2;  // D0. Requires external Pullup
-const int USB_DETECT_PIN =              gpio_num_t::GPIO_NUM_8;  // D8 Update to D9 so USB power wakes device. Requires external pulldown
-// POWER_BUTTON_PIN will no longer be inverted. External pulldown attached.
-// USB_DETECT_PIN updated to pin D9 in V2
-// MOTOR_1 updated to pin D5 in V2
-// MOTOR_2 updated to pin D4 in V2
-// MOTOR_3 updated to pin D3 in V2
-// MOTOR_4 updated to pin D2 in V2
-// MOTOR_5 updated to pin D6 in V2
-// MOTOR_6 updated to pin D10 in V2
+const int MOTOR_1 =                     gpio_num_t::GPIO_NUM_7; // D5
+const int MOTOR_2 =                     gpio_num_t::GPIO_NUM_6; // D4
+const int MOTOR_3 =                     gpio_num_t::GPIO_NUM_4; // D2
+const int MOTOR_4 =                     gpio_num_t::GPIO_NUM_5; // D3
+const int MOTOR_5 =                     gpio_num_t::GPIO_NUM_10;// D10
+const int MOTOR_6 =                     gpio_num_t::GPIO_NUM_21;// D6
+const int POWER_5V_PIN =                gpio_num_t::GPIO_NUM_8; // D8
+const gpio_num_t POWER_BUTTON_PIN_INV = gpio_num_t::GPIO_NUM_2; // D0
+const int USB_DETECT_PIN =              gpio_num_t::GPIO_NUM_9; // D9 
 
 enum ButtonState {BUTTON_STATE_OFF, BUTTON_STATE_PUSHED, BUTTON_STATE_ON, BUTTON_STATE_RELEASED};
 ButtonState powerButtonState = ButtonState::BUTTON_STATE_OFF;
@@ -68,7 +60,7 @@ int motorSelections[] =
 const int pinCount = sizeof(motorSelections) / sizeof(int);           // the number of pins (i.e. the length of the array)
 int motorSelectionIdx = 0;
 
-const int PWM_FREQ = 5000;
+const int PWM_FREQ = 22000;
 const int LEDC_CHANNEL1 = 0;
 const int LEDC_CHANNEL2 = 1;
 const int LEDC_CHANNEL3 = 2;
@@ -80,13 +72,15 @@ void setup() {
     hasButtonBeenReleasedSinceBoot = false;
     SetupGPIOs();
     
-    if(!PowerButtonHeldForPowerOn())// Waits here for MS_TO_HOLD_BEFORE_POWER_ON milliseconds or less before continueing
-    {
-        PowerOff();// Does not return
-    }
+    // if(!PowerButtonHeldForPowerOn())// Waits here for MS_TO_HOLD_BEFORE_POWER_ON milliseconds or less before continueing
+    // {
+    //     PowerOff();// Does not return
+    // }
     PowerOn();
     msNext5vPowerPulse = millis() + MS_BETWEEN_5V_POWER_PULSES;
     delay(10);// Give time for 5v to power up.
+    //Serial.begin(115200);
+    //Serial.println("Setup done.");
 }
 
 /// @brief Setup up GPIOs as inputs or outputs and attach interrupts.
@@ -94,12 +88,8 @@ void SetupGPIOs()
 {
     pinMode(POWER_5V_PIN, OUTPUT);
     digitalWrite(POWER_5V_PIN, HIGH);
-    pinMode(MOTOR_CONTROL_ENABLE_PIN, OUTPUT);
 
     SetupLEDCChannels();
-
-    pinMode(FAULT_PIN, INPUT + PULLUP);
-    attachInterrupt(FAULT_PIN, FaultInterruptHandler, FALLING);// If pin goes low, then motor driver has a fault and run this function.
     
     pinMode(POWER_BUTTON_PIN_INV, INPUT);
     gpio_pullup_en(POWER_BUTTON_PIN_INV);
@@ -129,6 +119,8 @@ void loop() {
         isFirstTime = false;
     }
     CheckStatus();
+    //Serial.print("Rnning loop: ");
+    //Serial.println(motorSelectionIdx);
     switch (motorSelections[motorSelectionIdx])
     { 
         case 1:
@@ -195,14 +187,6 @@ void CheckStatus()
     powerButtonState = digitalRead(POWER_BUTTON_PIN_INV)? ButtonState::BUTTON_STATE_OFF : ButtonState::BUTTON_STATE_ON;
 }
 
-/// @brief One-shot ISR for when motor controller produces a fault. 
-/// This can happen because either the motor controller is overheating or the current limit has been exceeded.
-/// IRAM_ATTR used to keep function in RAM.
-void IRAM_ATTR FaultInterruptHandler()
-{
-    numTimesMotorControllerFault += 1;
-}
-
 /// @brief One-shot ISR for when power button pushed down.
 /// IRAM_ATTR used to keep function in RAM.
 void IRAM_ATTR OnPowerButtonPushedInterruptHandler()
@@ -220,7 +204,6 @@ void FakePowerOff()
 /// @brief This function will not return unless plugged into USB.
 void PowerOff()
 {
-    digitalWrite(MOTOR_CONTROL_ENABLE_PIN, false); // Turn off Motor Controller.
     Set5VPower(false); // Turn off 5v supply for motors.
     if(!digitalRead(USB_DETECT_PIN)) // If USB not plugged in.
     {
@@ -238,7 +221,6 @@ void PowerOff()
 /// @brief Power on motor controller and 5v power rail.
 void PowerOn()
 {
-    digitalWrite(MOTOR_CONTROL_ENABLE_PIN, true); // Turn on Motor Controller.
     Set5VPower(true); // Turn on 5v supply for motors.
 }
 

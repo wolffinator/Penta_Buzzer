@@ -1,0 +1,1 @@
+JLCPCB has MP6507 which looks like a suitable replacement for the DRV8833
