@@ -8,21 +8,25 @@ const int MOTOR_1 =                     gpio_num_t::GPIO_NUM_7; // D5
 const int MOTOR_2 =                     gpio_num_t::GPIO_NUM_6; // D4
 const int MOTOR_3 =                     gpio_num_t::GPIO_NUM_4; // D2
 const int MOTOR_4 =                     gpio_num_t::GPIO_NUM_5; // D3
-const int MOTOR_5 =                     gpio_num_t::GPIO_NUM_10;// D10
-const int MOTOR_6 =                     gpio_num_t::GPIO_NUM_21;// D6
+const int MOTOR_5 =                     gpio_num_t::GPIO_NUM_21;// D10
+const int MOTOR_6 =                     gpio_num_t::GPIO_NUM_10;// D6
 const int POWER_5V_PIN =                gpio_num_t::GPIO_NUM_8; // D8
-const gpio_num_t POWER_BUTTON_PIN_INV = gpio_num_t::GPIO_NUM_2; // D0
+const gpio_num_t POWER_SWITCH_PIN_INV = gpio_num_t::GPIO_NUM_2; // D0
 const int USB_DETECT_PIN =              gpio_num_t::GPIO_NUM_9; // D9 
 
 enum ButtonState {BUTTON_STATE_OFF, BUTTON_STATE_PUSHED, BUTTON_STATE_ON, BUTTON_STATE_RELEASED};
-ButtonState powerButtonState = ButtonState::BUTTON_STATE_OFF;
+bool powerButtonState = LOW;
 
 uint32_t msWhenPowButtonPushed = 0;
 uint32_t msNext5vPowerPulse = 5000;
 
 const uint64_t MS_BETWEEN_5V_POWER_PULSES = 10000;
-const uint32_t MS_TO_HOLD_BEFORE_POWER_OFF = 2600;
-const uint32_t MS_TO_HOLD_BEFORE_POWER_ON = 2600;
+const uint32_t MS_TO_HOLD_BEFORE_POWER_OFF = 600;
+const uint32_t MS_TO_HOLD_BEFORE_POWER_ON = 600;
+constexpr float POWER_PERCENTAGE = 60; // 0-100
+
+
+constexpr int PWM_DUTY = (POWER_PERCENTAGE/100.0f) * 255;
 
 uint64_t numTimesMotorControllerFault = 0;
 
@@ -45,16 +49,29 @@ bool hasButtonBeenReleasedSinceBoot = false;
 
 int timer = 167;           // The higher the number, the slower the timing.
 
+// int originalMotorSelections[] = 
+// {
+//     4, 1, 2, 3, 1, 4, 2, 3, 1, 2, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13,
+//     4, 3, 2, 1, 3, 1, 2, 4, 2, 4, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13,
+//     3, 4, 1, 2, 1, 3, 2, 4, 2, 1, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13,
+//     3, 4, 2, 1, 4, 3, 1, 2, 1, 4, 3, 2, 13, 13, 13, 13, 13, 13, 13, 13,
+//     2, 3, 1, 4, 1, 3, 4, 2, 1, 2, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13,
+//     4, 2, 3, 1, 3, 2, 1, 4, 2, 1, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13,
+//     3, 1, 4, 2, 4, 2, 1, 3, 2, 3, 4, 1, 13, 13, 13, 13, 13, 13, 13, 13,
+//     4, 1, 3, 2, 3, 2, 4, 1, 2, 4, 1, 3, 13, 13, 13, 13, 13, 13, 13, 13
+// };
+
+// These were randomly generated
 int motorSelections[] = 
 {
-    4, 1, 2, 3, 1, 4, 2, 3, 1, 2, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13,
-    4, 3, 2, 1, 3, 1, 2, 4, 2, 4, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13,
-    3, 4, 1, 2, 1, 3, 2, 4, 2, 1, 4, 3, 13, 13, 13, 13, 13, 13, 13, 13,
-    3, 4, 2, 1, 4, 3, 1, 2, 1, 4, 3, 2, 13, 13, 13, 13, 13, 13, 13, 13,
-    2, 3, 1, 4, 1, 3, 4, 2, 1, 2, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13,
-    4, 2, 3, 1, 3, 2, 1, 4, 2, 1, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13,
-    3, 1, 4, 2, 4, 2, 1, 3, 2, 3, 4, 1, 13, 13, 13, 13, 13, 13, 13, 13,
-    4, 1, 3, 2, 3, 2, 4, 1, 2, 4, 1, 3, 13, 13, 13, 13, 13, 13, 13, 13
+    3, 5, 3, 5, 4, 4, 5, 1, 3, 5, 4, 5, 2, 1, 3, 13, 13, 13, 13, 13, 13, 13, 13, 
+    4, 5, 4, 3, 3, 3, 1, 4, 5, 3, 5, 2, 3, 4, 1, 13, 13, 13, 13, 13, 13, 13, 13, 
+    1, 2, 3, 5, 2, 3, 5, 3, 1, 3, 1, 3, 5, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
+    5, 1, 1, 2, 1, 4, 4, 1, 3, 2, 5, 5, 4, 2, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
+    4, 1, 2, 3, 2, 5, 4, 3, 1, 2, 2, 2, 5, 5, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
+    1, 4, 1, 5, 1, 5, 2, 4, 5, 4, 5, 4, 2, 4, 2, 13, 13, 13, 13, 13, 13, 13, 13, 
+    3, 5, 2, 3, 3, 5, 1, 3, 2, 2, 5, 5, 3, 1, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
+    3, 3, 3, 2, 4, 5, 5, 4, 4, 4, 4, 2, 2, 4, 4, 13, 13, 13, 13, 13, 13, 13, 13 
 };
 // an array of pin numbers to which LEDs are attached Pin 13 is a pause
 const int pinCount = sizeof(motorSelections) / sizeof(int);           // the number of pins (i.e. the length of the array)
@@ -65,10 +82,82 @@ const int LEDC_CHANNEL1 = 0;
 const int LEDC_CHANNEL2 = 1;
 const int LEDC_CHANNEL3 = 2;
 const int LEDC_CHANNEL4 = 3;
+const int LEDC_CHANNEL5 = 4;
+const int LEDC_CHANNEL6 = 5;
 const int PWM_RES = 8;// PWM values of 0-255 are valid with 8 bits of resolution
+
+void debug()
+{
+    Serial.begin(115200);
+    pinMode(2, INPUT);
+    pinMode(3, INPUT);
+    pinMode(4, INPUT);
+    pinMode(5, INPUT);
+    pinMode(6, INPUT);
+    pinMode(7, INPUT);
+    pinMode(21, INPUT);
+
+    pinMode(10, INPUT);
+    pinMode(9, INPUT);
+    pinMode(8, INPUT);
+    pinMode(20, INPUT);
+
+    while(true)
+    {
+        printf("2: %d\n", digitalRead(2));
+        printf("3: %d\n", digitalRead(3));
+        printf("4: %d\n", digitalRead(4));
+        printf("5: %d\n", digitalRead(5));
+        printf("6: %d\n", digitalRead(6));
+        printf("7: %d\n", digitalRead(7));
+        printf("21: %d\n", digitalRead(21));
+        printf("10: %d\n", digitalRead(10));
+        printf("9: %d\n", digitalRead(9));
+        printf("8: %d\n", digitalRead(8));
+        printf("20: %d\n\n", digitalRead(20));
+        delay(600);
+    }
+}
+
+void BuzzMotorsInOrder()
+{
+    ledcWrite(LEDC_CHANNEL1, 153);
+    delay(700);
+    ledcWrite(LEDC_CHANNEL1, 0);
+
+    ledcWrite(LEDC_CHANNEL2, 153);
+    delay(700);
+    ledcWrite(LEDC_CHANNEL2, 0);
+
+    ledcWrite(LEDC_CHANNEL3, 153);
+    delay(700);
+    ledcWrite(LEDC_CHANNEL3, 0);
+
+    ledcWrite(LEDC_CHANNEL4, 153);
+    delay(700);
+    ledcWrite(LEDC_CHANNEL4, 0);
+
+    ledcWrite(LEDC_CHANNEL5, 153);
+    delay(700);
+    ledcWrite(LEDC_CHANNEL5, 0);
+
+    ledcWrite(LEDC_CHANNEL6, 153);
+    delay(700);
+    ledcWrite(LEDC_CHANNEL6, 0);
+
+
+
+
+    // ledcWrite(LEDC_CHANNEL3, 153);
+    // delay(700);
+    // ledcWrite(LEDC_CHANNEL3, 0);
+    // delay(700);
+}
+
 
 /// @brief Generally speaking, the first function called by arduino.
 void setup() {
+    // debug();
     hasButtonBeenReleasedSinceBoot = false;
     SetupGPIOs();
     
@@ -79,8 +168,8 @@ void setup() {
     PowerOn();
     msNext5vPowerPulse = millis() + MS_BETWEEN_5V_POWER_PULSES;
     delay(10);// Give time for 5v to power up.
-    //Serial.begin(115200);
-    //Serial.println("Setup done.");
+    Serial.begin(115200);
+    Serial.println("Setup done.");
 }
 
 /// @brief Setup up GPIOs as inputs or outputs and attach interrupts.
@@ -91,9 +180,9 @@ void SetupGPIOs()
 
     SetupLEDCChannels();
     
-    pinMode(POWER_BUTTON_PIN_INV, INPUT);
-    gpio_pullup_en(POWER_BUTTON_PIN_INV);
-    attachInterrupt(POWER_BUTTON_PIN_INV, OnPowerButtonPushedInterruptHandler, FALLING);
+    pinMode(POWER_SWITCH_PIN_INV, INPUT);
+    gpio_pullup_en(POWER_SWITCH_PIN_INV);
+    attachInterrupt(POWER_SWITCH_PIN_INV, OnPowerButtonPushedInterruptHandler, FALLING);
 }
 
 /// @brief Setup LEDC channels. These are used to generate PWM signals for motors.
@@ -103,11 +192,15 @@ void SetupLEDCChannels()
     ledcSetup(LEDC_CHANNEL2, PWM_FREQ, PWM_RES);
     ledcSetup(LEDC_CHANNEL3, PWM_FREQ, PWM_RES);
     ledcSetup(LEDC_CHANNEL4, PWM_FREQ, PWM_RES);
+    ledcSetup(LEDC_CHANNEL5, PWM_FREQ, PWM_RES);
+    ledcSetup(LEDC_CHANNEL6, PWM_FREQ, PWM_RES);
     // attach the channel to the GPIO to be controlled
     ledcAttachPin(MOTOR_1, LEDC_CHANNEL1);
     ledcAttachPin(MOTOR_2, LEDC_CHANNEL2);
     ledcAttachPin(MOTOR_3, LEDC_CHANNEL3);
     ledcAttachPin(MOTOR_4, LEDC_CHANNEL4);
+    ledcAttachPin(MOTOR_5, LEDC_CHANNEL5);
+    ledcAttachPin(MOTOR_6, LEDC_CHANNEL6);
 }
 
 /// @brief Main loop of arduino. This function gets called forever.
@@ -118,9 +211,18 @@ void loop() {
         vTaskPrioritySet(NULL, tskIDLE_PRIORITY + 2);
         isFirstTime = false;
     }
+    // while(true)
+    // {
+    //     BuzzMotorsInOrder();
+    //     vTaskDelay(0);
+    //     CheckStatus();
+    // }
+    
+
     CheckStatus();
     //Serial.print("Rnning loop: ");
     //Serial.println(motorSelectionIdx);
+    
     switch (motorSelections[motorSelectionIdx])
     { 
         case 1:
@@ -143,61 +245,70 @@ void loop() {
             delay(timer);
             ledcWrite(LEDC_CHANNEL4, 0);
         break;
+
+        case 5:
+            ledcWrite(LEDC_CHANNEL5, 153); 
+            delay(timer);
+            ledcWrite(LEDC_CHANNEL5, 0);
+        break;
         case 13:
             delay(timer);
         break;
     }
+    
+    // Serial.printf("p: %d", digitalRead(POWER_BUTTON_PIN_INV));
+    // Serial.printf("u: %d", digitalRead(USB_DETECT_PIN));
     motorSelectionIdx = (motorSelectionIdx + 1) % pinCount;
 }
 
 /// @brief Check current power button state and do any interactions associated with that state.
 void UpdatePowerButtonState()
 {
-    if(powerButtonState == ButtonState::BUTTON_STATE_ON)
-    {
-    }
-    else if(powerButtonState == ButtonState::BUTTON_STATE_OFF)
-    {
-        hasButtonBeenReleasedSinceBoot = true;
-    }
-    else if(powerButtonState == BUTTON_STATE_PUSHED)
-    {
-        msWhenPowButtonPushed = millis();
-        powerButtonState = ButtonState::BUTTON_STATE_ON;
-    }
-    else if(powerButtonState == BUTTON_STATE_RELEASED)
-    {
-        powerButtonState = ButtonState::BUTTON_STATE_OFF;
-    }
+    // if(powerButtonState == ButtonState::BUTTON_STATE_ON)
+    // {
+    // }
+    // else if(powerButtonState == ButtonState::BUTTON_STATE_OFF)
+    // {
+    //     hasButtonBeenReleasedSinceBoot = true;
+    // }
+    // else if(powerButtonState == BUTTON_STATE_PUSHED)
+    // {
+    //     msWhenPowButtonPushed = millis();
+    //     powerButtonState = ButtonState::BUTTON_STATE_ON;
+    // }
+    // else if(powerButtonState == BUTTON_STATE_RELEASED)
+    // {
+    //     powerButtonState = ButtonState::BUTTON_STATE_OFF;
+    // }
 }
 
 /// @brief Checks status of buttons and runs 5v power pulses. Turns off microcontroller if requirements met.
 void CheckStatus()
 {
     UpdatePowerButtonState();
-    if(((millis() - msWhenPowButtonPushed) > MS_TO_HOLD_BEFORE_POWER_OFF) && (powerButtonState != ButtonState::BUTTON_STATE_OFF && powerButtonState != BUTTON_STATE_RELEASED) && hasButtonBeenReleasedSinceBoot)
+    if(((millis() - msWhenPowButtonPushed) > MS_TO_HOLD_BEFORE_POWER_OFF) && (powerButtonState == HIGH))
     {
         PowerOff();// Does not return
     }
-    if(millis() > msNext5vPowerPulse && powerButtonState != ButtonState::BUTTON_STATE_ON && powerButtonState != ButtonState::BUTTON_STATE_PUSHED)
+    if(millis() > msNext5vPowerPulse && powerButtonState == HIGH)
     {
         msNext5vPowerPulse += MS_BETWEEN_5V_POWER_PULSES;
         xTaskCreate(Pulse5VPower, "Pulse5VPower", 6000, NULL, tskIDLE_PRIORITY + 1, NULL);// Create non-blocking task to keep power on.
     }
-    powerButtonState = digitalRead(POWER_BUTTON_PIN_INV)? ButtonState::BUTTON_STATE_OFF : ButtonState::BUTTON_STATE_ON;
+    powerButtonState = !digitalRead(POWER_SWITCH_PIN_INV);
 }
 
 /// @brief One-shot ISR for when power button pushed down.
 /// IRAM_ATTR used to keep function in RAM.
 void IRAM_ATTR OnPowerButtonPushedInterruptHandler()
 {
-    powerButtonState = BUTTON_STATE_PUSHED;
+    powerButtonState = HIGH;
 }
 
 /// @brief If usb plugged in, don't go to sleep. Just wait for user to power on device and restart on button push.
 void FakePowerOff()
 {
-    while(digitalRead(POWER_BUTTON_PIN_INV)){delay(10);}
+    while(!digitalRead(POWER_SWITCH_PIN_INV)){delay(10);}
     esp_restart();
 }
 
@@ -207,8 +318,7 @@ void PowerOff()
     Set5VPower(false); // Turn off 5v supply for motors.
     if(!digitalRead(USB_DETECT_PIN)) // If USB not plugged in.
     {
-        esp_deep_sleep_enable_gpio_wakeup(1 << uint64_t(POWER_BUTTON_PIN_INV), esp_deepsleep_gpio_wake_up_mode_t::ESP_GPIO_WAKEUP_GPIO_LOW);
-        while(!digitalRead(POWER_BUTTON_PIN_INV));// Wait until button released
+        esp_deep_sleep_enable_gpio_wakeup(1 << uint64_t(POWER_SWITCH_PIN_INV), esp_deepsleep_gpio_wake_up_mode_t::ESP_GPIO_WAKEUP_GPIO_LOW);
         esp_deep_sleep_start(); // Go into deep sleep. Will only wake on power button being pushed.
     }
     else 
@@ -262,12 +372,12 @@ bool PowerButtonHeldForPowerOn()
 {
     while((millis() - msWhenPowButtonPushed) <= MS_TO_HOLD_BEFORE_POWER_ON)
     {
-        if(digitalRead(POWER_BUTTON_PIN_INV))// If button released early
+        if(digitalRead(POWER_SWITCH_PIN_INV))// If button released early
         {
-            powerButtonState = ButtonState::BUTTON_STATE_OFF;
+            powerButtonState = LOW;
             return false;
         }
-        powerButtonState = ButtonState::BUTTON_STATE_ON;
+        powerButtonState = HIGH;
         delay(50);
     }
     msWhenPowButtonPushed = INT_MAX;
