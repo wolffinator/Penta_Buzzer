@@ -3,6 +3,9 @@
 #include "rtc.h"
 #include "rtc_store.h"
 
+// Note: For future design, reserve D2 and D0 for USB detect and power switch respectively. They
+// are the only GPIO pins on the board that can wake it from deep sleep.
+
 // GPIO NUMBER IS NOT BOARD OUTPUT NUMBER! See pin_map-2.png
 const int MOTOR_1 =                     gpio_num_t::GPIO_NUM_7; // D5
 const int MOTOR_2 =                     gpio_num_t::GPIO_NUM_6; // D4
@@ -64,14 +67,14 @@ int timer = 167;           // The higher the number, the slower the timing.
 // These were randomly generated
 int motorSelections[] = 
 {
-    3, 5, 3, 5, 4, 4, 5, 1, 3, 5, 4, 5, 2, 1, 3, 13, 13, 13, 13, 13, 13, 13, 13, 
-    4, 5, 4, 3, 3, 3, 1, 4, 5, 3, 5, 2, 3, 4, 1, 13, 13, 13, 13, 13, 13, 13, 13, 
-    1, 2, 3, 5, 2, 3, 5, 3, 1, 3, 1, 3, 5, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
-    5, 1, 1, 2, 1, 4, 4, 1, 3, 2, 5, 5, 4, 2, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
-    4, 1, 2, 3, 2, 5, 4, 3, 1, 2, 2, 2, 5, 5, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
-    1, 4, 1, 5, 1, 5, 2, 4, 5, 4, 5, 4, 2, 4, 2, 13, 13, 13, 13, 13, 13, 13, 13, 
-    3, 5, 2, 3, 3, 5, 1, 3, 2, 2, 5, 5, 3, 1, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
-    3, 3, 3, 2, 4, 5, 5, 4, 4, 4, 4, 2, 2, 4, 4, 13, 13, 13, 13, 13, 13, 13, 13 
+    3, 2, 4, 1, 5, 1, 3, 2, 4, 5, 4, 2, 5, 1, 3, 13, 13, 13, 13, 13, 13, 13, 13, 
+    4, 1, 5, 2, 3, 2, 1, 4, 5, 3, 3, 2, 4, 5, 1, 13, 13, 13, 13, 13, 13, 13, 13, 
+    3, 4, 1, 5, 2, 4, 3, 2, 5, 1, 1, 4, 3, 2, 5, 13, 13, 13, 13, 13, 13, 13, 13, 
+    5, 2, 1, 4, 3, 5, 1, 2, 3, 4, 5, 2, 1, 3, 4, 13, 13, 13, 13, 13, 13, 13, 13, 
+    2, 3, 4, 5, 1, 1, 3, 2, 5, 4, 1, 4, 3, 2, 5, 13, 13, 13, 13, 13, 13, 13, 13, 
+    5, 2, 3, 1, 4, 2, 4, 5, 3, 1, 3, 4, 1, 2, 5, 13, 13, 13, 13, 13, 13, 13, 13, 
+    5, 1, 3, 2, 4, 5, 2, 4, 1, 3, 1, 4, 2, 5, 3, 13, 13, 13, 13, 13, 13, 13, 13, 
+    2, 5, 3, 4, 1, 5, 4, 2, 3, 1, 5, 3, 1, 2, 4, 13, 13, 13, 13, 13, 13, 13, 13 
 };
 // an array of pin numbers to which LEDs are attached Pin 13 is a pause
 const int pinCount = sizeof(motorSelections) / sizeof(int);           // the number of pins (i.e. the length of the array)
